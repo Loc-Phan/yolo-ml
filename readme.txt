@@ -3,4 +3,5 @@
 - Cài đặt môi trường python 3.8 (x64) và pip
 - Gõ cmd: pip install Flask, pip install opencv-python, pip install e2e.api, pip install scikit-image, pip install imutils, pip install Keras,
 pip install tensorflow, 
-Gõ cmd: python upload.py
+- Gõ cmd: python upload.py
+- Vào trình duyệt: localhost:7000
