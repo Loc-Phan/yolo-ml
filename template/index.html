@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>YOLO - Real-Time Object Detection</title>
+    <!-- Favicon-->
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="../static/assets/img/favicon.ico"
+    />
+    <!-- Font Awesome icons (free version)-->
+    <script
+      src="https://use.fontawesome.com/releases/v5.13.0/js/all.js"
+      crossorigin="anonymous"
+    ></script>
+    <!-- Google fonts-->
+    <link
+      href="https://fonts.googleapis.com/css?family=Merriweather+Sans:400,700"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Merriweather:400,300,300italic,400italic,700,700italic"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <!-- Third party plugin CSS-->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/magnific-popup.min.css"
+      rel="stylesheet"
+    />
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <link href="../static/css/styles.css" rel="stylesheet" />
+    <style>
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      .file-upload {
+        background-color: #ffffff;
+        width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .file-upload-btn {
+        width: 100%;
+        margin: 0;
+        color: #fff;
+        background: #1fb264;
+        border: none;
+        padding: 10px;
+        border-radius: 4px;
+        border-bottom: 4px solid #15824b;
+        transition: all 0.2s ease;
+        outline: none;
+        text-transform: uppercase;
+        font-weight: 700;
+      }
+
+      .file-upload-btn:hover {
+        background: #1aa059;
+        color: #ffffff;
+        transition: all 0.2s ease;
+        cursor: pointer;
+      }
+
+      .file-upload-btn:active {
+        border: 0;
+        transition: all 0.2s ease;
+      }
+
+      .file-upload-content {
+        display: none;
+        text-align: center;
+      }
+
+      .file-upload-input {
+        position: absolute;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        outline: none;
+        opacity: 0;
+        cursor: pointer;
+      }
+
+      .image-upload-wrap {
+        margin-top: 20px;
+        border: 4px dashed #1fb264;
+        position: relative;
+      }
+
+      .image-dropping,
+      .image-upload-wrap:hover {
+        background-color: #1fb264;
+        border: 4px dashed #ffffff;
+      }
+
+      .image-title-wrap {
+        padding: 0 15px 15px 15px;
+        color: #222;
+      }
+
+      .drag-text {
+        text-align: center;
+      }
+
+      .drag-text h3 {
+        font-weight: 100;
+        text-transform: uppercase;
+        color: #15824b;
+        padding: 60px 0;
+      }
+
+      .file-upload-image {
+        max-height: 200px;
+        max-width: 200px;
+        margin: auto;
+        padding: 20px;
+      }
+
+      .remove-image {
+        width: 200px;
+        margin: 0;
+        color: #fff;
+        background: #cd4535;
+        border: none;
+        padding: 10px;
+        border-radius: 4px;
+        border-bottom: 4px solid #b02818;
+        transition: all 0.2s ease;
+        outline: none;
+        text-transform: uppercase;
+        font-weight: 700;
+      }
+
+      .remove-image:hover {
+        background: #c13b2a;
+        color: #ffffff;
+        transition: all 0.2s ease;
+        cursor: pointer;
+      }
+
+      .remove-image:active {
+        border: 0;
+        transition: all 0.2s ease;
+      }
+      /* Full-width input fields */
+      input[type="text"],
+      input[type="password"] {
+        width: 100%;
+        padding: 12px 20px;
+        margin: 8px 0;
+        display: inline-block;
+        border: 1px solid #ccc;
+        box-sizing: border-box;
+      }
+
+      /* Set a style for all buttons */
+      button {
+        background-color: #4caf50;
+        color: white;
+        padding: 14px 20px;
+        margin: 8px 0;
+        border: none;
+        cursor: pointer;
+        width: 100%;
+      }
+
+      button:hover {
+        opacity: 0.8;
+      }
+
+      /* Extra styles for the cancel button */
+      .cancelbtn {
+        width: auto;
+        padding: 10px 18px;
+        background-color: #f44336;
+      }
+
+      /* Center the image and position the close button */
+      .imgcontainer {
+        text-align: center;
+        margin: 24px 0 12px 0;
+        position: relative;
+      }
+
+      img.avatar {
+        width: 40%;
+        border-radius: 50%;
+      }
+
+      .container {
+        padding: 16px;
+      }
+
+      span.psw {
+        float: right;
+        padding-top: 16px;
+      }
+
+      /* The Modal (background) */
+      .modal {
+        display: none;
+        /* Hidden by default */
+        position: fixed;
+        /* Stay in place */
+        z-index: 1;
+        /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%;
+        /* Full width */
+        height: 100%;
+        /* Full height */
+        overflow: auto;
+        /* Enable scroll if needed */
+        background-color: rgb(0, 0, 0);
+        /* Fallback color */
+        background-color: rgba(0, 0, 0, 0.4);
+        /* Black w/ opacity */
+        padding-top: 60px;
+      }
+
+      /* Modal Content/Box */
+      .modal-content {
+        background-color: #fefefe;
+        margin: 5% auto 15% auto;
+        /* 5% from the top, 15% from the bottom and centered */
+        border: 1px solid #888;
+        width: 80%;
+        /* Could be more or less, depending on screen size */
+      }
+
+      /* The Close Button (x) */
+      .close {
+        position: absolute;
+        right: 25px;
+        top: 0;
+        color: #000;
+        font-size: 35px;
+        font-weight: bold;
+      }
+
+      .close:hover,
+      .close:focus {
+        color: red;
+        cursor: pointer;
+      }
+
+      /* Add Zoom Animation */
+      .animate {
+        -webkit-animation: animatezoom 0.6s;
+        animation: animatezoom 0.6s;
+      }
+
+      @-webkit-keyframes animatezoom {
+        from {
+          -webkit-transform: scale(0);
+        }
+
+        to {
+          -webkit-transform: scale(1);
+        }
+      }
+
+      @keyframes animatezoom {
+        from {
+          transform: scale(0);
+        }
+
+        to {
+          transform: scale(1);
+        }
+      }
+
+      /* Change styles for span and cancel button on extra small screens */
+      @media screen and (max-width: 300px) {
+        span.psw {
+          display: block;
+          float: none;
+        }
+
+        .cancelbtn {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+
+  <body id="page-top">
+    <!-- Navigation-->
+    <nav
+      class="navbar navbar-expand-lg navbar-light fixed-top py-3"
+      id="mainNav"
+    >
+      <div class="container">
+        <a class="navbar-brand js-scroll-trigger" href="#page-top">Home</a>
+        <button
+          class="navbar-toggler navbar-toggler-right"
+          type="button"
+          data-toggle="collapse"
+          data-target="#navbarResponsive"
+          aria-controls="navbarResponsive"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <ul class="navbar-nav ml-auto my-2 my-lg-0">
+            <li class="nav-item">
+              <a
+                class="nav-link js-scroll-trigger"
+                href="https://pjreddie.com/darknet/yolo/"
+                target="_blank"
+                >About</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link js-scroll-trigger" href="#services">Model</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link js-scroll-trigger" href="#portfolio"
+                >Example</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link js-scroll-trigger" href="#uploadnow"
+                >Dectect</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link js-scroll-trigger" href="#contact">Contact</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <!-- Masthead-->
+    <header class="masthead">
+      <div class="container h-100">
+        <div
+          class="row h-100 align-items-center justify-content-center text-center"
+        >
+          <div class="col-lg-10 align-self-end">
+            <h1 class="text-uppercase text-white font-weight-bold">
+              YOLO - YOU ONLY LOOK ONCE
+            </h1>
+            <hr class="divider my-4" />
+          </div>
+          <div class="col-lg-8 align-self-baseline">
+            <p class="text-white-75 font-weight-light mb-5">
+              You only look once (YOLO) is one of today's best real-time object
+              recognition systems with high accuracy and fast processing times
+            </p>
+            <a class="btn btn-primary btn-xl js-scroll-trigger" href="#services"
+              >Find Out More</a
+            >
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Services-->
+    <section class="page-section" id="services">
+      <div class="container">
+        <h2 class="text-center mt-0">At Our Model</h2>
+        <hr class="divider my-4" />
+        <div class="row">
+          <div class="col-lg-3 col-md-6 text-center">
+            <div class="mt-5">
+              <i class="fas fa-4x fa-user-secret text-primary mb-4"></i>
+              <h3 class="h4 mb-2">Person</h3>
+              <p class="text-muted mb-0">
+                Our themes are detected people or lots of people!
+              </p>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 text-center">
+            <div class="mt-5">
+              <i class="fas fa-4x fa-dog text-primary mb-4"></i>
+
+              <h3 class="h4 mb-2">Animals</h3>
+              <p class="text-muted mb-0">
+                Our themes are detected animal or items with 80 type: Cat, Dog,
+                Laptop, Vase, Knife, ...!
+              </p>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 text-center">
+            <div class="mt-5">
+              <i class="fas fa-4x fa-car text-primary mb-4"></i>
+              <h3 class="h4 mb-2">License plates</h3>
+              <p class="text-muted mb-0">
+                You can upload a image have contain cars or motobikes to detect
+                license plates!
+              </p>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 text-center">
+            <div class="mt-5">
+              <i class="fas fa-4x fa-money-bill-alt text-primary mb-4"></i>
+              <h3 class="h4 mb-2">Vehicle registration plate</h3>
+              <p class="text-muted mb-0">
+                You can upload a image have contain cars or motobikes to detect
+                vehicle registration plate!
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Portfolio-->
+    <div id="portfolio">
+      <div class="container-fluid p-0">
+        <div class="row no-gutters">
+          <div class="col-lg-4 col-sm-6">
+            <a class="portfolio-box" href="../static/camxoa1_.jpg">
+              <img class="img-fluid" src="../static/camxoa1.jpg" alt="" />
+              <div class="portfolio-box-caption">
+                <div class="project-category text-white-50">
+                  Category
+                </div>
+                <div class="project-name">Person and animals</div>
+              </div>
+            </a>
+          </div>
+          <div class="col-lg-4 col-sm-6">
+            <a class="portfolio-box" href="../static/camxoa6_.jpg">
+              <img class="img-fluid" src="../static/camxoa2.jpg" alt="" />
+              <div class="portfolio-box-caption">
+                <div class="project-category text-white-50">
+                  Category
+                </div>
+                <div class="project-name">License plates</div>
+              </div>
+            </a>
+          </div>
+          <div class="col-lg-4 col-sm-6">
+            <a class="portfolio-box" href="../static/camxoa_.jpg">
+              <img class="img-fluid" src="../static/camxoa.jpg" alt="" />
+              <div class="portfolio-box-caption">
+                <div class="project-category text-white-50">
+                  Category
+                </div>
+                <div class="project-name">Person</div>
+              </div>
+            </a>
+          </div>
+          <div class="col-lg-4 col-sm-6">
+            <a class="portfolio-box" href="../static/camxoa3_.jpg">
+              <img class="img-fluid" src="../static/camxoa3.jpg" alt="" />
+              <div class="portfolio-box-caption">
+                <div class="project-category text-white-50">
+                  Category
+                </div>
+                <div class="project-name">Person and car</div>
+              </div>
+            </a>
+          </div>
+          <div class="col-lg-4 col-sm-6">
+            <a class="portfolio-box" href="../static/camxoa4_.jpg">
+              <img class="img-fluid" src="../static/camxoa4.jpg" alt="" />
+              <div class="portfolio-box-caption">
+                <div class="project-category text-white-50">
+                  Category
+                </div>
+                <div class="project-name">Vehicle registration plate</div>
+              </div>
+            </a>
+          </div>
+          <div class="col-lg-4 col-sm-6">
+            <a class="portfolio-box" href="../static/camxoa5_.jpg">
+              <img class="img-fluid" src="../static/camxoa5.jpg" alt="" />
+              <div class="portfolio-box-caption p-3">
+                <div class="project-category text-white-50">
+                  Category
+                </div>
+                <div class="project-name">Person and potted plant</div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Call to action-->
+    <section id="uploadnow" class="page-section bg-dark text-white">
+      <div class="container text-center">
+        <h2 class="mb-4">Start detecting a image!</h2>
+        <a
+          onclick="document.getElementById('id01').style.display='block'"
+          class="btn btn-primary btn-xl js-scroll-trigger"
+        >
+          Upload Now
+        </a>
+
+        <div id="id01" class="modal">
+          <form
+            class="modal-content animate"
+            action="/success"
+            method="POST"
+            enctype="multipart/form-data"
+          >
+            <div class="imgcontainer">
+              <span
+                onclick="document.getElementById('id01').style.display='none'"
+                class="close"
+                title="Close Modal"
+                >&times;</span
+              >
+              <img
+                src="../static/img_avatar2.png"
+                alt="Avatar"
+                class="avatar"
+              />
+            </div>
+
+            <div class="container text-left">
+              <label style="color: #000; left: 30px; font-size: 20px;"
+                ><b>Option</b></label
+              >
+              <br />
+              <select
+                name="selected_id"
+                style="
+                  width: 300px;
+                  height: 35px;
+                  background-color: #1fb264;
+                  color: #fff;
+                  font-family: Arial;
+                  border: none;
+                  border-radius: 4px;
+                "
+              >
+                <option value="1">All</option>
+                <option value="2">License plates</option>
+                <option value="3">Vehicle registration plate</option>
+              </select>
+
+              <br />
+              <label
+                for="psw"
+                style="
+                  color: #000;
+                  left: 30px;
+                  font-size: 20px;
+                  margin-top: 8px;
+                "
+                ><b>Upload Image</b></label
+              >
+
+              <script
+                class="jsbin"
+                src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"
+              ></script>
+              <div class="file-upload">
+                <button
+                  class="file-upload-btn"
+                  type="button"
+                  onclick="$('.file-upload-input').trigger( 'click' )"
+                >
+                  Add Image
+                </button>
+
+                <div class="image-upload-wrap">
+                  <input
+                    class="file-upload-input"
+                    type="file"
+                    onchange="readURL(this);"
+                    accept="image/*"
+                    name="file"
+                  />
+                  <div class="drag-text">
+                    <h3>Drag and drop a file or select add Image</h3>
+                  </div>
+                </div>
+                <div class="file-upload-content">
+                  <img class="file-upload-image" src="#" alt="your image" />
+                  <div class="image-title-wrap">
+                    <button
+                      type="button"
+                      onclick="removeUpload()"
+                      class="remove-image"
+                    >
+                      Remove <span class="image-title">Uploaded Image</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <button type="submit">Upload</button>
+            </div>
+
+            <div class="container" style="background-color: #f1f1f1;">
+              <button
+                type="button"
+                onclick="document.getElementById('id01').style.display='none'"
+                class="cancelbtn"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+    <!-- Contact-->
+    <section class="page-section" id="contact">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-8 text-center">
+            <h2 class="mt-0">Let's Get In Touch!</h2>
+            <hr class="divider my-4" />
+            <p class="text-muted mb-5">
+              Thank you for using our app! Give us a call or send us an email to
+              feedback on the quality of our products as well as support us to
+              develop more it with greater performance.
+            </p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-lg-4 ml-auto text-center mb-5 mb-lg-0">
+            <i class="fas fa-phone fa-3x mb-3 text-muted"></i>
+            <div>+84 (999) 123-4567</div>
+          </div>
+          <div class="col-lg-4 mr-auto text-center">
+            <i class="fas fa-envelope fa-3x mb-3 text-muted"></i>
+            <!-- Make sure to change the email address in BOTH the anchor text and the link target below!-->
+            <a class="d-block" href="mailto:pcloc101099@gmail.com"
+              >pcloc101099@gmail.com</a
+            >
+            <a class="d-block" href="mailto:hoanghuylich@gmail.com"
+              >hoanghuylich@gmail.com</a
+            >
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Footer-->
+    <footer class="bg-light py-5">
+      <div class="container">
+        <div class="small text-center text-muted">
+          Copyright © 2020 - You only look once
+        </div>
+      </div>
+    </footer>
+    <!-- Bootstrap core JS-->
+    <script>
+      function readURL(input) {
+        if (input.files && input.files[0]) {
+          var reader = new FileReader();
+
+          reader.onload = function (e) {
+            $(".image-upload-wrap").hide();
+
+            $(".file-upload-image").attr("src", e.target.result);
+            $(".file-upload-content").show();
+
+            $(".image-title").html(input.files[0].name);
+          };
+
+          reader.readAsDataURL(input.files[0]);
+        } else {
+          removeUpload();
+        }
+      }
+
+      function removeUpload() {
+        $(".file-upload-input").replaceWith($(".file-upload-input").clone());
+        $(".file-upload-content").hide();
+        $(".image-upload-wrap").show();
+      }
+      $(".image-upload-wrap").bind("dragover", function () {
+        $(".image-upload-wrap").addClass("image-dropping");
+      });
+      $(".image-upload-wrap").bind("dragleave", function () {
+        $(".image-upload-wrap").removeClass("image-dropping");
+      });
+    </script>
+    <script>
+      // Get the modal
+      var modal = document.getElementById("id01");
+
+      // When the user clicks anywhere outside of the modal, close it
+      window.onclick = function (event) {
+        if (event.target == modal) {
+          modal.style.display = "none";
+        }
+      };
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.bundle.min.js"></script>
+    <!-- Third party plugin JS-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js"></script>
+    <!-- Core theme JS-->
+    <script src="../static/js/scripts.js"></script>
+  </body>
+</html>
